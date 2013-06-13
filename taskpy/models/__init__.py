@@ -14,6 +14,10 @@ class Job(db.Model):
 	runs = db.relationship('Run')
 
 	@property
+	def parent_task(self):
+		return db.session.query(JobTasks).filter(JobTasks.job_id == self.id, JobTasks.parent_id == None).one()
+
+	@property
 	def status(self):
 		if len(self.runs) != 0:
 			return self.runs[-1].result
@@ -61,7 +65,18 @@ class JobTasks(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
 	task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-	order = db.Column(db.Integer)
+	parent_id = db.Column(db.Integer, db.ForeignKey('job_tasks.id'))
+
+	task = db.relationship('Task', lazy='joined')
+	children = db.relationship('JobTasks')
+
+	def as_json(self):
+		return {
+			  'id': self.id
+			, 'task': self.task.as_json()
+			, 'parent': self.parent_id
+			, 'children': [x.id for x in self.children]
+			}
 
 class Run(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
