@@ -15,6 +15,9 @@ def make_app():
 	app.config['TASKPY_BASE'] = os.path.expanduser(os.path.join('~', '.taskpy'))
 	app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % os.path.join(app.config['TASKPY_BASE'], 'main.db')
 
+	print "Base directory: %s" % app.config['TASKPY_BASE']
+	print "Database: %s" % app.config['SQLALCHEMY_DATABASE_URI']
+
 	# Make sure TASKPY_BASE exists
 	if not os.path.exists(app.config['TASKPY_BASE']):
 		os.mkdir(app.config['TASKPY_BASE'])

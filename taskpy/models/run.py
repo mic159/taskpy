@@ -8,10 +8,19 @@ def load_time(data, field):
 	return None
 
 class RunConfig(object):
+	'''
+	Object to serialize the config of the run to pass down to the celery
+	worker. This is done instead of having the worker be able to connect
+	to the database.
+	'''
 	def __init__(self, job):
 		self.tasks = [task.as_json() for task in job.tasks]
 
 class RunResult(object):
+	'''
+	This object is used to record the results of a run, and be passed
+	back as the result of a worker.
+	'''
 	def __init__(self, data={}, celery_id=None):
 		self.state = data.get('state')
 		self.start_time = load_time(data, 'start_time')
