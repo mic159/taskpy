@@ -11,6 +11,7 @@ class Job(db.Model):
 	name = db.Column(db.String(30), unique=True, nullable=False, index=True)
 
 	tasks = db.relationship('Task', secondary='job_tasks', lazy='joined')
+	task_configs = db.relationship('JobTasks')
 	runs = db.relationship('Run')
 
 	@property

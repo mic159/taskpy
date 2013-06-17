@@ -14,11 +14,11 @@ celery = Celery('taskpy-worker', broker='amqp://guest@localhost//', backend='amq
 def run_job(config):
 	result = RunResult(celery_id=run_job.request.id)
 	result.record_begin()
-	success = True
-	for task in config.tasks:
+	def run_task(task_id):
+		task = config.tasks[task_id]
 		# Write script to disk
-		script = tempfile.NamedTemporaryFile(prefix='taskpy_script_{}_'.format(task['name']), delete=False)
-		script.write(task['script'])
+		script = tempfile.NamedTemporaryFile(prefix='taskpy_script_{}_'.format(task['task']['name']), delete=False)
+		script.write(task['task']['script'])
 		script.close()
 		# Executable permissions
 		os.chmod(script.name, stat.S_IRWXU)
@@ -28,10 +28,16 @@ def run_job(config):
 		rcode = process.wait()
 		# Delete temp file
 		os.remove(script.name)
-		result.record_task(task['id'], output, rcode)
+		result.record_task(task['task']['id'], output, rcode)
 		if rcode != 0:
-			success = False
-			break
+			return False
+		# Execute child task chains
+		for child_id in task['children']:
+			if not run_task(child_id):
+				return False
+		# Collate success
+		return True
+	success = run_task(config.parent_id)
 	result.record_end(success)
 	return result
 

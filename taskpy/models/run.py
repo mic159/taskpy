@@ -14,8 +14,8 @@ class RunConfig(object):
 	to the database.
 	'''
 	def __init__(self, job):
-		self.tasks = {x.id: x.as_json() for x in job.tasks}
-		self.start_id = job.parent_task.id
+		self.tasks = {x.id: x.as_json() for x in job.task_configs}
+		self.parent_id = job.parent_task.id
 
 class RunResult(object):
 	'''
