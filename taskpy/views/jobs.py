@@ -68,7 +68,7 @@ class JobsView(ModelView):
 		if not job:
 			return flask.redirect(flask.url_for('.index_view'))
 		here = flask.url_for('.job_view', id=id)
-		return self.render('job.html', job=job, return_url=here)
+		return self.render('job.html', job=job, return_url=here, parent_task=[job.parent_task])
 
 	@admin.expose('/job/<id>/run')
 	def start_run_view(self, id):
